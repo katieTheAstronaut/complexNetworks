@@ -1,6 +1,7 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
+import random
 
 # Abbildung und Netzwerkgraph erstellen
 fig, ax = plt.subplots()
@@ -30,19 +31,19 @@ G.add_nodes_from(last_as)
 # Router mit Clients in ihrem AS verbinden
 for u in range (4):
     for v in range(1,6):
-        G.add_edge(central_clients[u], f"AS{u+1}_client{v}")
+        G.add_edge(central_clients[u], f"AS{u+1}_client{v}", color='lightgrey')
 
 # Router mit Transit-AS verbinden
-G.add_edges_from([("transit_AS_1", client) for client in central_clients])
+G.add_edges_from([("transit_AS_1", client) for client in central_clients], color='lightgrey')
 
 # Transit-AS Clients verbinden
-G.add_edges_from([("transit_AS_1", f"Transit_client{i}") for i in range(1,6)])
-G.add_edges_from([("transit_AS_2", f"Transit_client{i}") for i in range(1,6)])
+G.add_edges_from([("transit_AS_1", f"Transit_client{i}") for i in range(1,6)], color='lightgrey')
+G.add_edges_from([("transit_AS_2", f"Transit_client{i}") for i in range(1,6)], color='lightgrey')
 
 # Oberes AS verbinden
 for i in range(1,6):
-    G.add_edge("Last_AS_Central_Client", f"Last_AS_Client{i}")
-G.add_edge("transit_AS_2", "Last_AS_Central_Client")    
+    G.add_edge("Last_AS_Central_Client", f"Last_AS_Client{i}", color='lightgrey')
+G.add_edge("transit_AS_2", "Last_AS_Central_Client", color='lightgrey')    
 
 ####### Positionierung der Knoten festlegen
 pos = {}
@@ -99,8 +100,40 @@ as_labels = ["AS 1 (Enterprise)", "AS 2 (Enterprise)", "AS 3 (Enterprise)", "AS 
 for position, label in zip(as_positions, as_labels):
     plt.text(position[0], position[1], label, fontsize='x-small')
 
+########## Botnetz erstellen
+# Angreifer und Handler/ C&Cs darstellen
+G.add_node("Attacker")    
+G.add_node("Handler_1")
+G.add_node("Handler_2")
+pos["Attacker"] = (2.5, -1)
+pos["Handler_1"] = (1.5, -0.5)
+pos["Handler_2"] = (3.5, -0.5)
+plt.text(2.4, -1.3, "Angreifer", fontsize = 'small')
+plt.text(1.4, -0.8, "Handler 1", fontsize = 'small')
+plt.text(3.4, -0.8, "Handler 2", fontsize = 'small')
+
+# Liste von Bots: Für jeden Client in AS 1-4 zufällig wählen, ob infiziert
+bot = []
+for i in range (1,5):
+    for j in range (1,6):
+        if random.choice([True, False]) == True:
+            bot.append(f"AS{i}_client{j}")
+
+# Fehlende Kanten zeichnen
+G.add_edge("Attacker", "Handler_1",color='lightpink')
+G.add_edge("Attacker", "Handler_2", color='lightpink')
+for bots in bot:
+    G.add_edge(bots, "Handler_1" if int(bots[2]) <3 else "Handler_2", color='lightpink')
+
+# # Knoten und Kanten einfärben
+# Infizierte Clients rot darstellen
+edges = G.edges()
+colour_map = ['red' if node in bot or node == "Attacker" or node == "Handler_1" or node == "Handler_2" else 'skyblue' for node in G]
+edge_colours = nx.get_edge_attributes(G,'color').values()
+
+
 # Graph zeichnen
-nx.draw(G,pos,node_size=100, node_color='skyblue', edge_color='gray')
+nx.draw(G,pos,node_size=100, node_color=colour_map, edge_color=edge_colours)
 
 # Abbildung anzeigen
 plt.show()
