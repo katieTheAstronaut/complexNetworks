@@ -22,7 +22,6 @@ for u in range(1,5):
 G.add_nodes_from(["transit_AS_1", "transit_AS_2"])
 G.add_nodes_from([f"Transit_client{i}" for i in range(1,6)])
 
-
 # Knoten für oberes AS (6) erstellen
 last_as = [f"Last_AS_Client{i}" for i in range(1, 6)]
 G.add_nodes_from(last_as)
@@ -102,9 +101,7 @@ for position, label in zip(as_positions, as_labels):
 
 ########## Botnetz erstellen
 # Angreifer und Handler/ C&Cs darstellen
-G.add_node("Attacker")    
-G.add_node("Handler_1")
-G.add_node("Handler_2")
+G.add_nodes_from(["Attacker", "Handler_1","Handler_2"])
 pos["Attacker"] = (2.5, -1)
 pos["Handler_1"] = (1.5, -0.5)
 pos["Handler_2"] = (3.5, -0.5)
@@ -130,7 +127,6 @@ for bots in bot:
 edges = G.edges()
 colour_map = ['red' if node in bot or node == "Attacker" or node == "Handler_1" or node == "Handler_2" else 'skyblue' for node in G]
 edge_colours = nx.get_edge_attributes(G,'color').values()
-
 
 # Graph zeichnen
 nx.draw(G,pos,node_size=100, node_color=colour_map, edge_color=edge_colours)

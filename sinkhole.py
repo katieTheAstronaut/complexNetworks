@@ -102,9 +102,7 @@ for position, label in zip(as_positions, as_labels):
 
 ########## Botnetz erstellen
 # Angreifer und Handler/ C&Cs darstellen
-G.add_node("Attacker")    
-G.add_node("Handler_1")
-G.add_node("Handler_2")
+G.add_nodes_from(["Attacker", "Handler_1","Handler_2"])
 pos["Attacker"] = (2.5, -1)
 pos["Handler_1"] = (1.5, -0.5)
 pos["Handler_2"] = (3.5, -0.5)
@@ -123,31 +121,16 @@ for i in range (1,5):
 G.add_edge("Attacker", "Handler_1",color='lightpink')
 G.add_edge("Attacker", "Handler_2", color='lightpink')
 
-############# DDoS-Angriff darstellen 
-###### Bei Blackholing wird der Angriff am Edge Router Transit_AS_1 gestoppt
-traversed_nodes = []
-
+############# DDoS-Angriff darstellen // bei Sinkhole 
 for bots in bot:
-    G.add_edge(bots, "Handler_1" if int(bots[2]) <3 else "Handler_2", color='lightgrey') # Bots mit Handlern verbinden
-    # G.add_edge(bots, f"AS_Central_Client{int(bots[2])}", color='lightpink') # Verbindung zwischen Bots und Edge Routern rot färben
+    G.add_edge(bots, "Handler_1" if int(bots[2]) <3 else "Handler_2", color='lightgrey') # Bots mit Handlern verbinden, aber inaktiv (grau)
     G.add_edge(bots, "Sinkhole", color='lightpink') # Verbindung zwischen Bots und Sinkhole
     
-    # if f"AS_Central_Client{int(bots[2])}" not in traversed_nodes:
-    #     traversed_nodes.append(f"AS_Central_Client{int(bots[2])}")
-
 attackers = ["Attacker", "Handler_1", "Handler_2"]
 target_node = ["Last_AS_Client2"]
 
-# for i in range(1,5):
-#     G.add_edge("transit_AS_1", f"AS_Central_Client{i}", color='lightpink')
-
-edges = G.edges()
-edge_colours = nx.get_edge_attributes(G,'color').values()
-
-
 #############Sinkhole
 # Knoten und Box für Sinkhole darstellen
-
 G.add_node("Sinkhole")    
 pos["Sinkhole"] = (0, -0.5)
 plt.text(-0.2, -0.9, "Sinkhole System", fontsize = 'small')
@@ -156,8 +139,7 @@ ax.add_patch(Rectangle((-0.3, -0.7), 0.7, 0.6, facecolor='red', alpha = ALPHA, e
 # Farben etc.
 edges = G.edges()
 edge_colours = nx.get_edge_attributes(G,'color').values()
-colour_map = ['red' if node in attackers else 'grey' if node in bot else 'pink' if node in traversed_nodes else 'black' if node == "Sinkhole" else 'green' if node in target_node else 'skyblue' for node in G]
-
+colour_map = ['red' if node in attackers else 'grey' if node in bot else 'black' if node == "Sinkhole" else 'green' if node in target_node else 'skyblue' for node in G]
 
 # Graph zeichnen
 nx.draw(G,pos,node_size=100, node_color=colour_map, edge_color=edge_colours)

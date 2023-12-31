@@ -102,9 +102,7 @@ for position, label in zip(as_positions, as_labels):
 
 ########## Botnetz erstellen
 # Angreifer und Handler/ C&Cs darstellen
-G.add_node("Attacker")    
-G.add_node("Handler_1")
-G.add_node("Handler_2")
+G.add_nodes_from(["Attacker", "Handler_1","Handler_2"])
 pos["Attacker"] = (2.5, -1)
 pos["Handler_1"] = (1.5, -0.5)
 pos["Handler_2"] = (3.5, -0.5)
@@ -125,9 +123,6 @@ G.add_edge("Attacker", "Handler_2", color='lightpink')
 
 ############# DDoS-Angriff darstellen
 traversed_nodes = ["transit_AS_1", "transit_AS_2", "Transit_client4", "Last_AS_Central_Client"]
-# for i in range(1,6):
-#     traversed_nodes.append(f"Transit_client{i}") # Only if all of AS5 is used for routing
-
 for bots in bot:
     G.add_edge(bots, "Handler_1" if int(bots[2]) <3 else "Handler_2", color='lightpink') # Bots mit Handlern verbinden
     G.add_edge(bots, f"AS_Central_Client{int(bots[2])}", color='lightpink') # Verbindung zwischen Bots und Edge Routern rot färben
@@ -136,9 +131,9 @@ for bots in bot:
 
 attackers = ["Attacker", "Handler_1", "Handler_2"]
 target_node = ["Last_AS_Client2"]
+
 # Knoten und Kantenfarben erweitern:
 colour_map = ['red' if node in bot or node in attackers else 'pink' if node in traversed_nodes else 'Orange' if node in target_node else 'skyblue' for node in G]
-
 for i in range(1,5):
     G.add_edge("transit_AS_1", f"AS_Central_Client{i}", color='lightpink')
 G.add_edge("transit_AS_1","Transit_client4", color='lightpink')
@@ -146,14 +141,8 @@ G.add_edge("transit_AS_2","Transit_client4", color='lightpink')
 G.add_edge("Last_AS_Central_Client","transit_AS_2", color='lightpink')
 G.add_edge("Last_AS_Central_Client","Last_AS_Client2", color='lightpink')
 
-# ## Falls innerhalb von AS 5 all clients genutzt werden: 
-# for i in range(1,6):
-#     G.add_edge("transit_AS_1", f"Transit_client{i}", color='lightpink')
-
 edges = G.edges()
 edge_colours = nx.get_edge_attributes(G,'color').values()
-
-
 
 # Graph zeichnen
 nx.draw(G,pos,node_size=100, node_color=colour_map, edge_color=edge_colours)
